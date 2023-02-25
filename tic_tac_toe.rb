@@ -1,56 +1,121 @@
 class Players
-    attr_accessor :name, :human
+  attr_accessor :name, :sign
 
-    def initialize(name, human)
-        @name = name
-        @human = human
-        @boxes = []
+  def initialize(name, human)
+    @name = name
+    @human = human
+    @sign = sign
+    @boxes = []
+  end
+
+  def update_boxes(boxes, choice)
+    boxes << choice
+  end
+
+  def play_round(board, sign)
+    available = board.values.delete('X', 'O')
+    choice = get_choice(available, human)
+    update_boxes
+    board[choice] = sign
+    board
+  end
+
+  def winner?
+    win_combo = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 4, 7], [2, 5, 8], [3, 6, 9], [1, 5, 9], [3, 5, 7]]
+    win_combo.each do |combo|
+      return true if combo[0] == sign && combo[1] == sign && combo[2] == sign
     end
+  end
 end
 
+def get_choice(available, human)
+  if human == true
+    choice = nil
+    until available.include?(choice)
+      choice = gets.chomp.to_i
+      puts 'incorrect input, please try again:' unless available.include?(choice)
+    end
+    choice
+  else
+    available.sample
 
+  end
+end
 
+def show_result(board)
+  puts "  #{board[1]}  |  #{board[2]}  |  #{board[3]}  \n
+          _____&_____&_____\n
+            #{board[1]}  |  #{board[2]}  |  #{board[3]}  \n
+          _____&_____&_____\n
+            #{board[1]}  |  #{board[2]}  |  #{board[3]}  \n"
+end
 
-def start_game
-    puts "Shall we begin? (yes/no)"
+def tic_tac_toe(player_1, player_2)
+  board = { 1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5, 6 => 6, 7 => 7, 8 => 8, 9 => 9 }
+  puts "#{player_1.name} plays X and #{player_2.name} plays O"
+  loop do
+    puts "#{player_1.name}, your turn"
+    player_1.play_round(board)
+    break if player_1.winner?
+
+    puts "Nice, now #{player_2.name}, what's you gonna do?"
+    player_2.play_round(board)
+    break if player_2.winner?
+
+    show_result(board)
+    break if board.values.delete('X', 'O') == []
+  end
+
+  if player_1.winner?
+    puts "Good job #{player_1.name}! you're smarter than you look!"
+  elsif player_2.winner?
+    puts "#{player_2.name} got you #{player_1.name}!"
+  else
+    puts "It's a draw!"
+  end
+
+  def start_game
+    puts 'Shall we begin? (yes/no)'
     response = gets.chomp
 
-    until response == "yes" || response =="no" do
-        puts "...it wasn't even a difficult question! I repeat: Do you want to play?"
-        response = gets.chomp
+    until %w[yes no].include?(response)
+      puts "...it wasn't even a difficult question! I repeat: Do you want to play?"
+      response = gets.chomp
     end
-    if response == "yes"
-        puts "Great! lets get to it!"
-        puts "Playing Tic Tac Toe!" #tic_tac_toe(player_1, player_2)
-    else response == "no"
-        puts "Too sad! I'm leaving then, so long!"
+    if response == 'yes'
+      puts 'Great! lets get to it!'
+      puts 'Playing Tic Tac Toe!' # tic_tac_toe(player_1, player_2)
+    else
+      response == 'no'
+      puts "Too sad! I'm leaving then, so long!"
     end
-end
+  end
 
-puts "Welcome to Tic Tac Toe! How many human players do we have today?"
-number_of_players = gets.chomp.to_i
+  puts 'Welcome to Tic Tac Toe! How many human players do we have today?'
+  number_of_players = gets.chomp.to_i
 
-until number_of_players == 1 || number_of_players == 2 do
-    puts "Ha ha! very funny! now seriously, how many are you?"
+  until [1, 2].include?(number_of_players)
+    puts 'Ha ha! very funny! now seriously, how many are you?'
     number_of_players = gets.chomp.to_i
-end
-if number_of_players == 1
+  end
+  if number_of_players == 1
     puts "feeling lonely? don't worry honey, you'll play with my good friend Cortana!"
-    puts "Please enter your name:"
+    puts 'Please enter your name:'
     p1 = gets.chomp.capitalize
-    player_1 = Players.new(p1, true)
-    player_2 = Players.new("Cortana", false)
+    player_1 = Players.new(p1, true, 'X')
+    player_2 = Players.new('Cortana', false, 'O')
     puts "how cute! welcome ...#{player_1.name}!"
     start_game
-else 
-    puts "The more the merrier, the more fun!"
-    puts "Player 1, please enter your name:"
+  else
+    puts 'The more the merrier, the more fun!'
+    puts 'Player 1, please enter your name:'
     p1 = gets.chomp.capitalize
-    player_1 = Players.new(p1, true)
+    player_1 = Players.new(p1, true, 'X')
     puts "Welcome #{player_1.name}"
-    puts "Player 2, please come closer and type your name:"
+    puts 'Player 2, please come closer and type your name:'
     p2 = gets.chomp.capitalize
-    player_2 = Players.new(p2, true)
+    player_2 = Players.new(p2, true, 'O')
     puts "hum...if you say so! welcome #{player_2.name}!"
-    start_game    
+    start_game
+  end
 end
